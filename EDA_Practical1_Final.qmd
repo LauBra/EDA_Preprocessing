@@ -25,7 +25,7 @@ use_condaenv("hds-python", required = TRUE)
 
 ### Missing Data Imputation
 
-We are now moving to Python. You will be able to explore missingness here too, as well as explore the concept of imputation and dummy variables. 
+We are now moving to Python. You will be able to explore missingness here too, as well as explore the concept of imputation and dummy variables.
 
 This example illustrates how to apply different preprocessing and feature imputation functions to different subsets of features, using `SimpleImputer` and `KNNImputer`. This is particularly handy for the case of datasets that contain heterogeneous data types, since we may want to impute the numeric as well as categorical features.
 
@@ -46,7 +46,7 @@ set_config(display='diagram')
 
 You can download the dataset we will be using through the link:
 
--   [LongIsland_Heart_Data.csv](/Users/bravol/Desktop/ML%20Class/Practical/EDA/LongIsland_Heart_Data.csv)
+-   [LongIsland_Heart_Data.csv](LongIsland_Heart_Data.csv)
 
 ```{python}
 np.random.seed(0)
@@ -185,4 +185,3 @@ As you have seen we have gone back to original data so one of the new columns cr
 #Impute dataset and then do hot encoding: 
 
 ```
-

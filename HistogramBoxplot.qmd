@@ -119,7 +119,15 @@ ggplot(data, aes(x = age)) +
 
 For an extra challenge, add another geom layer, i.e `geom_jitter`. What does it do? How is it different from `geom_point`?
 
-Now, lets go a step further. If we want to understand how teh data varies by groups, we can use facets:
+Now, lets go a step further. If we want to understand how the data varies by groups, we can use facets:
+
+```{r}
+ggplot(data, aes(x = age, y = "age" )) + 
+  geom_boxplot() + 
+  geom_jitter() +
+  coord_flip() + 
+  geom_vline(xintercept = Mean, color = "blue", linetype = "dashed", size = 1) 
+```
 
 ```{r}
 # Sample data
