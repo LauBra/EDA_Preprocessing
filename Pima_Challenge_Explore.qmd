@@ -100,11 +100,7 @@ Which one behaves unexpectedly?
 
 # 5. Log-transform insulin (after imputation)
 
-Create a new variable:
-
-\[
-\text{insulin\_log} = \log(\text{insulin})
-\]
+Create a new variable:`log(insulin)`
 
 Do this **after** imputation to avoid problems with missing values or zeros.
 
