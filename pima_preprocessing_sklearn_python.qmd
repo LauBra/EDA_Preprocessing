@@ -1,6 +1,6 @@
 
 ---
-title: "(8) Complete pipeline leakage - Python"
+title: "(9) Complete pipeline leakage - Python"
 format:
   html:
     toc: true
@@ -11,6 +11,7 @@ execute:
 ---
 
 This document shows how to perform **mean imputation** and **standardisation** correctly in Python using **scikit-learn**, first **manually** and then using a **Pipeline**.
+This is a new concept that we will explore in detail in the next classes, but please check this out for things you do not understand <https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html>
 
 We load the same Pima Indians database and select the following columns:
 
@@ -51,7 +52,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 ```
 
-We are once again using the PIMA indians database. 
+
 
 ```{python}
 

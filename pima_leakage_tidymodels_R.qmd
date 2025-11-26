@@ -1,6 +1,6 @@
 
 ---
-title: "(9) Complete pipeline leakage - R"
+title: "(8) Complete pipeline leakage - R"
 format:
   html:
     toc: true
@@ -19,7 +19,6 @@ theme_set(theme_minimal())
 set.seed(123)
 ```
 
-## 1. Data and goal
 
 We will use the `PimaIndiansDiabetes2` dataset and focus on simple regression problems where:
 
@@ -28,9 +27,8 @@ We will use the `PimaIndiansDiabetes2` dataset and focus on simple regression pr
 
 We will:
 
-1. Show **leakage with scaling** (standardisation).
-2. Show **leakage with mean imputation** of `insulin`.
-3. Show the **correct, leak-free approach** using **recipes + workflows** in tidymodels.
+Show the **correct, leak-free approach** using **recipes + workflows** in tidymodels. Please be sure to check out anything new for you here: <https://www.tidymodels.org/start/recipes/>
+
 
 ```{r}
 data("PimaIndiansDiabetes2", package = "mlbench")
@@ -45,9 +43,9 @@ summary(pima_base)
 ```
 
 
-## 4. Doing it properly with tidymodels recipes (impute + scale)
+## Doing it properly with tidymodels recipes (impute + scale)
 
-Finally, we let **recipes** handle both:
+We let **recipes** handle both:
 
 - `step_impute_mean()` → mean imputation  
 - `step_normalize()` → standardisation  
