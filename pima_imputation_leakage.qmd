@@ -22,13 +22,14 @@ set.seed(123)
 
 ## Imputation leakage with insulin (no scaling)
 
-We now look at **mean imputation of `insulin`**:
+Following the scaling concept, if we are learning anything from the data, this should  strictly happen in the training data. Therefore, when imputing we have to be aware of data leakage too. As an example, we now look at **mean imputation of `insulin`**:
 
 - **Outcome**: `pedigree`
 - **Predictors**: `age`, `insulin_imp`
 - We compare:
   - ❌ **WRONG**: mean for imputation computed using **all data** (leakage)
   - ✅ **RIGHT**: mean for imputation computed using **training data only**
+  
 
 ```{r}
 data("PimaIndiansDiabetes2", package = "mlbench")
@@ -178,3 +179,4 @@ tibble(
           mae_right_imp$.estimate)
 )
 ```
+

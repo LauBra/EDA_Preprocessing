@@ -9,6 +9,7 @@ project:
   - EDA_Practical3.qmd
   - pima_leakage_pipeline.qmd
   - pima_imputation_leakage.qmd
+  - pima_leakage_tidymodels_R.qmd
   - pima_preprocessing_sklearn_python.qmd
   - Pima_Challenge_Explore.qmd
 
@@ -40,6 +41,7 @@ website:
         - divider: true  # Adds a divider
         - pima_leakage_pipeline.qmd
         - pima_imputation_leakage.qmd
+        - pima_leakage_tidymodels_R.qmd
         - pima_preprocessing_sklearn_python.qmd
         - Pima_Challenge_Explore.qmd
         

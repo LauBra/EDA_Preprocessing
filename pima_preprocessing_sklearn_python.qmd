@@ -52,9 +52,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 ```
 
-## 1. Example data (placeholder)
-
-Replace this with your real data load. Here we just create a tiny artificial example so the code runs.
+We are once again using the PIMA indians database. 
 
 ```{python}
 

@@ -1,11 +1,22 @@
-## Histograms and Boxplots
+## (1) Histograms and Boxplots
+
+In this first practical, we will be using R. This is just a training to improve our plotting skills and basic understanding on data distribution. 
+
+------------------------------------------------------------------------
 
 Histograms show the overall shape and spread of the data distribution and box plots summarise key statistics (median, spread, and potential outliers) and are particularly helpful for comparing distributions across groups.
 
 ### Summary Statistics
 
 ```{r}
+
+#Remember, if you do not have these packages installed, install them first with (install.packages())
+
 library(ggplot2)
+library(patchwork)
+library(gapminder)
+library(tidyverse)
+
 ```
 
 ```{r}
@@ -106,21 +117,24 @@ ggplot(data, aes(x = age)) +
    geom_vline(xintercept = Mean, color = "blue", linetype = "dashed", size = 1) 
 ```
 
-Bit more advanced! (add another geom layer, in this case `geom_jitter`. What does it do? How is it different from `geom_point`?)
+For an extra challenge, add another geom layer, i.e `geom_jitter`. What does it do? How is it different from `geom_point`?
+
+Now, lets go a step further. If we want to understand how teh data varies by groups, we can use facets:
 
 ```{r}
-# Load ggplot2
-library(ggplot2)
-
 # Sample data
 set.seed(123)
+
 data <- data.frame(
   Group = rep(c("A", "B", "C"), each = 200),
   Value = c(rnorm(200, mean = 5, sd = 1), 
             rnorm(200, mean = 6, sd = 1.2), 
             rnorm(200, mean = 7, sd = 1.5))
 )
+```
 
+
+```{r}
 # Combined Plot
 p1 <- ggplot(data, aes(x = Group, y = Value, fill = Group)) +
   # Violin + Boxplot + Jitter
@@ -128,7 +142,10 @@ p1 <- ggplot(data, aes(x = Group, y = Value, fill = Group)) +
   geom_jitter(position = position_jitter(0.2), color = "black", alpha = 0.4) + #scatter plot but in random positions, check geom_point() and see
   labs(title = "Boxplot and Violin Plot with Jitter", x = "Groups", y = "Values") +
   theme_minimal()
+```
 
+
+```{r}
 p2 <- ggplot(data, aes(x = Value, fill = Group)) +
   # Histogram
   geom_histogram(alpha = 0.6, position = "identity", binwidth = 0.3, colour = "black") +
@@ -137,24 +154,22 @@ p2 <- ggplot(data, aes(x = Value, fill = Group)) +
 ```
 
 ```{r}
-# Display both plots side by side
-library(patchwork)
+# Display both plots side by side (thanks to having patchwork installed)
+
 p1 + p2
 
 ```
 
 ```{r}
 # Display both plots up down
-library(patchwork)
+
 p1 / p2
 
 ```
 
-Also, maybe we want to understand how the distribution varies by more groups. We can use facets:
+Lets use this in another dataset (gapminder dataset that we have access to, thanks to the laoded package `gapminder`)
 
 ```{r}
-
-library(gapminder)
 
 # Box plot with facets by year
 ggplot(gapminder, aes(x = continent, y = lifeExp, fill = continent)) +
@@ -168,21 +183,17 @@ ggplot(gapminder, aes(x = continent, y = lifeExp, fill = continent)) +
 
 ```
 
-What is happening here? View (gapminder) dataset. If we focus on 1952 year, extract the necessary values to create the boxplot for Africa.
+What is happening here? View (gapminder) dataset. If we focus on 1952 year, extract the necessary values to create the boxplot for Africa (use data wrangling skills through `tidyverse` package).
 
 ```{r}
-#for example 
-library(tidyverse)
-
 
 Subgroup <- gapminder %>% 
   filter(year == "1952") %>%
   filter(continent == "Africa")
-#data wrangling - can learn more from Introduction exercise on data wrangling
 
 Median <- median(Subgroup$lifeExp)
 
 Median
 ```
 
-Does it match the plot? Continue with the rest of parameters (IQR, mean, quantile)
+Does it match the plot? 

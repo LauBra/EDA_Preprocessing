@@ -1,12 +1,18 @@
-## Correlation - R
+## (2) Correlation - R
 
-As you have learnt throughout these modules, Python and R offer packages and libraries that contain already predefined functions ready to implement into your code. For you to see the breadth of possibilities out there, here is an example of different ways in whcih to describe and learn about the correlation matrix of your dataset.
+Again, this practical is also in R. This is an example of the great amount of resources available in open-source programming languages (will also be able to find similar things in Python), where new packages are developed and made available constantly. As key insight, explore, probably what you need is already out there for you to use!
+
+------------------------------------------------------------------------
+
+For you to see the breadth of possibilities out there, here is an example of different ways in which to describe and learn about the correlation matrix of your dataset.
 
 ```{r, message=FALSE}
 
 
 # Install required libraries (if not already installed)
-#install.packages(c("ggplot2", "corrplot", "ggcorrplot", "PerformanceAnalytics", "GGally", "psych", "corrr"))
+
+#install.packages(c("ggplot2", "corrplot", "ggcorrplot", 
+#"PerformanceAnalytics", "GGally", "psych", "corrr"))
 
 # Load necessary libraries
 library(ggplot2)
@@ -47,13 +53,7 @@ Now we are going to produce the correlation matrix, where in a go, you get insig
 data <- mtcars[, c("mpg", "disp", "hp", "wt")]
 ```
 
-But first, produce plots of all the two variable associations combinations in the features studied `c("mpg", "disp", "hp", "wt")`. How many plots do you need?
-
-```{r}
-
-```
-
-Can you calculate the correlation between them? Remember there are different ways in which to calculate correlation <https://www.sthda.com/english/wiki/correlation-test-between-two-variables-in-r> and you can specify the type in your code `cor(x, y, method = c("pearson", "kendall", "spearman"))`
+Can you calculate the correlation between them? Try out at least a pair.Remember there are different ways in which to calculate correlation <https://www.sthda.com/english/wiki/correlation-test-between-two-variables-in-r> and you can specify the type in your code `cor(x, y, method = c("pearson", "kendall", "spearman"))`
 
 ```{r}
 

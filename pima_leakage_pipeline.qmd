@@ -24,7 +24,7 @@ set.seed(123)
 
 We will use the `PimaIndiansDiabetes2` dataset and focus on a **simple regression problem**:
 
-- **Outcome**: `pedigree` (diabetes pedigree function)  
+- **Outcome**: `pedigree` (diabetes pedigree function - family members with diabetes)  
 - **Predictors**: `age`, `glucose`  
 
 Our goal is to **compare two pipelines**:
@@ -85,7 +85,7 @@ test  <- testing(data_split)
 nrow(train); nrow(test)
 ```
 
-### 2.4. Fit linear regression model and compute MAE (WRONG)
+### 2.4. Fit linear regression model and compute MAE 
 
 ```{r}
 ped_model <- linear_reg() %>%
@@ -152,7 +152,7 @@ head(train_scaled)
 head(test_scaled)
 ```
 
-### 3.4. Fit linear regression model and compute MAE (RIGHT)
+### 3.4. Fit linear regression model and compute MAE 
 
 ```{r}
 ped_model <- linear_reg() %>%
@@ -183,3 +183,4 @@ tibble(
           mae_right$.estimate)
 )
 ```
+Even though same results, what you can find is that if data from the test is `seen` by data in the training, we can end up with an inflated performance. In this case, data distribution is the same, so mean and sd in train and general/all data did not vary much (but they are definitely not the same, can go back now and compare values) so this is good practice. 

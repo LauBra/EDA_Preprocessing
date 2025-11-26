@@ -139,25 +139,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./HistogramBoxplot.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Histograms and Boxplots</span></a>
+ <span class="menu-text">(1) Histograms and Boxplots</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./Correlation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Correlation - R</span></a>
+ <span class="menu-text">(2) Correlation - R</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./MissingPackages.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Missing Pipelines in R</span></a>
+ <span class="menu-text">(3) Missing Pipelines in R</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./EDA_Practical1_Final.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Missing Data Imputation - Python</span></a>
+ <span class="menu-text">Missing Data, Imputation and Dummy Variables - Python</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -176,6 +176,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="./pima_imputation_leakage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Pima Imputation → Leak vs Leak-free (R)</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./pima_leakage_tidymodels_R.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pima – Leakage, Imputation &amp; Scaling with tidymodels (R)</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -205,7 +211,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><a href="#compute-global-mean-and-sd-leaky" id="toc-compute-global-mean-and-sd-leaky" class="nav-link" data-scroll-target="#compute-global-mean-and-sd-leaky">2.1. Compute global mean and sd (leaky)</a></li>
   <li><a href="#scale-the-full-dataset-using-global-statistics" id="toc-scale-the-full-dataset-using-global-statistics" class="nav-link" data-scroll-target="#scale-the-full-dataset-using-global-statistics">2.2. Scale the full dataset using global statistics</a></li>
   <li><a href="#traintest-split-on-already-scaled-data" id="toc-traintest-split-on-already-scaled-data" class="nav-link" data-scroll-target="#traintest-split-on-already-scaled-data">2.3. Train–test split on already scaled data</a></li>
-  <li><a href="#fit-linear-regression-model-and-compute-mae-wrong" id="toc-fit-linear-regression-model-and-compute-mae-wrong" class="nav-link" data-scroll-target="#fit-linear-regression-model-and-compute-mae-wrong">2.4. Fit linear regression model and compute MAE (WRONG)</a></li>
+  <li><a href="#fit-linear-regression-model-and-compute-mae" id="toc-fit-linear-regression-model-and-compute-mae" class="nav-link" data-scroll-target="#fit-linear-regression-model-and-compute-mae">2.4. Fit linear regression model and compute MAE</a></li>
   </ul>
 </li>
   <li>
@@ -214,7 +220,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><a href="#traintest-split-on-the-original-data" id="toc-traintest-split-on-the-original-data" class="nav-link" data-scroll-target="#traintest-split-on-the-original-data">3.1. Train–test split on the original data</a></li>
   <li><a href="#compute-training-only-mean-and-sd" id="toc-compute-training-only-mean-and-sd" class="nav-link" data-scroll-target="#compute-training-only-mean-and-sd">3.2. Compute training-only mean and sd</a></li>
   <li><a href="#scale-train-and-test-using-training-statistics" id="toc-scale-train-and-test-using-training-statistics" class="nav-link" data-scroll-target="#scale-train-and-test-using-training-statistics">3.3. Scale train and test using training statistics</a></li>
-  <li><a href="#fit-linear-regression-model-and-compute-mae-right" id="toc-fit-linear-regression-model-and-compute-mae-right" class="nav-link" data-scroll-target="#fit-linear-regression-model-and-compute-mae-right">3.4. Fit linear regression model and compute MAE (RIGHT)</a></li>
+  <li><a href="#fit-linear-regression-model-and-compute-mae-1" id="toc-fit-linear-regression-model-and-compute-mae-1" class="nav-link" data-scroll-target="#fit-linear-regression-model-and-compute-mae-1">3.4. Fit linear regression model and compute MAE</a></li>
   </ul>
 </li>
   <li><a href="#comparing-mae-leaky-vs-leak-free" id="toc-comparing-mae-leaky-vs-leak-free" class="nav-link" data-scroll-target="#comparing-mae-leaky-vs-leak-free">4. Comparing MAE: leaky vs leak-free</a></li>
@@ -249,7 +255,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>We will use the <code>PimaIndiansDiabetes2</code> dataset and focus on a <strong>simple regression problem</strong>:</p>
 <ul>
 <li>
-<strong>Outcome</strong>: <code>pedigree</code> (diabetes pedigree function)<br>
+<strong>Outcome</strong>: <code>pedigree</code> (diabetes pedigree function - family members with diabetes)<br>
 </li>
 <li>
 <strong>Predictors</strong>: <code>age</code>, <code>glucose</code>
@@ -350,7 +356,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>[1] 231</code></pre>
 </div>
 </div>
-</section><section id="fit-linear-regression-model-and-compute-mae-wrong" class="level3"><h3 class="anchored" data-anchor-id="fit-linear-regression-model-and-compute-mae-wrong">2.4. Fit linear regression model and compute MAE (WRONG)</h3>
+</section><section id="fit-linear-regression-model-and-compute-mae" class="level3"><h3 class="anchored" data-anchor-id="fit-linear-regression-model-and-compute-mae">2.4. Fit linear regression model and compute MAE</h3>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ped_model</span> <span class="op">&lt;-</span> <span class="fu">linear_reg</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"lm"</span><span class="op">)</span></span>
@@ -450,7 +456,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 27  43     147    0.257      0.8167335  0.83139832</code></pre>
 </div>
 </div>
-</section><section id="fit-linear-regression-model-and-compute-mae-right" class="level3"><h3 class="anchored" data-anchor-id="fit-linear-regression-model-and-compute-mae-right">3.4. Fit linear regression model and compute MAE (RIGHT)</h3>
+</section><section id="fit-linear-regression-model-and-compute-mae-1" class="level3"><h3 class="anchored" data-anchor-id="fit-linear-regression-model-and-compute-mae-1">3.4. Fit linear regression model and compute MAE</h3>
 <div class="cell">
 <details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ped_model</span> <span class="op">&lt;-</span> <span class="fu">linear_reg</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"lm"</span><span class="op">)</span></span>
@@ -491,6 +497,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 2 RIGHT: scaled using training only    0.234</code></pre>
 </div>
 </div>
+<p>Even though same results, what you can find is that if data from the test is <code>seen</code> by data in the training, we can end up with an inflated performance. In this case, data distribution is the same, so mean and sd in train and general/all data did not vary much (but they are definitely not the same, can go back now and compare values) so this is good practice.</p>
 
 
 <!-- -->
@@ -980,7 +987,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>We will use the <span class="in">`PimaIndiansDiabetes2`</span> dataset and focus on a **simple regression problem**:</span>
 <span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Outcome**: <span class="in">`pedigree`</span> (diabetes pedigree function)  </span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Outcome**: <span class="in">`pedigree`</span> (diabetes pedigree function - family members with diabetes)  </span>
 <span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Predictors**: <span class="in">`age`</span>, <span class="in">`glucose`</span>  </span>
 <span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a>Our goal is to **compare two pipelines**:</span>
@@ -1041,7 +1048,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb36-94"><a href="#cb36-94" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(train); <span class="fu">nrow</span>(test)</span>
 <span id="cb36-95"><a href="#cb36-95" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb36-96"><a href="#cb36-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-97"><a href="#cb36-97" aria-hidden="true" tabindex="-1"></a><span class="fu">### 2.4. Fit linear regression model and compute MAE (WRONG)</span></span>
+<span id="cb36-97"><a href="#cb36-97" aria-hidden="true" tabindex="-1"></a><span class="fu">### 2.4. Fit linear regression model and compute MAE </span></span>
 <span id="cb36-98"><a href="#cb36-98" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb36-101"><a href="#cb36-101" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
 <span id="cb36-102"><a href="#cb36-102" aria-hidden="true" tabindex="-1"></a>ped_model <span class="ot">&lt;-</span> <span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span></span>
@@ -1108,7 +1115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb36-169"><a href="#cb36-169" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(test_scaled)</span>
 <span id="cb36-170"><a href="#cb36-170" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb36-171"><a href="#cb36-171" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-172"><a href="#cb36-172" aria-hidden="true" tabindex="-1"></a><span class="fu">### 3.4. Fit linear regression model and compute MAE (RIGHT)</span></span>
+<span id="cb36-172"><a href="#cb36-172" aria-hidden="true" tabindex="-1"></a><span class="fu">### 3.4. Fit linear regression model and compute MAE </span></span>
 <span id="cb36-173"><a href="#cb36-173" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb36-176"><a href="#cb36-176" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
 <span id="cb36-177"><a href="#cb36-177" aria-hidden="true" tabindex="-1"></a>ped_model <span class="ot">&lt;-</span> <span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span></span>
@@ -1139,6 +1146,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb36-204"><a href="#cb36-204" aria-hidden="true" tabindex="-1"></a>          mae_right<span class="sc">$</span>.estimate)</span>
 <span id="cb36-205"><a href="#cb36-205" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb36-206"><a href="#cb36-206" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb36-207"><a href="#cb36-207" aria-hidden="true" tabindex="-1"></a>Even though same results, what you can find is that if data from the test is <span class="in">`seen`</span> by data in the training, we can end up with an inflated performance. In this case, data distribution is the same, so mean and sd in train and general/all data did not vary much (but they are definitely not the same, can go back now and compare values) so this is good practice. </span>
 </code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

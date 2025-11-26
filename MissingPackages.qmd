@@ -1,8 +1,11 @@
-## Missing Pipelines in R
+## (3) Missing Pipelines in R
 
 As with the correlation matrices before, there are really good packages to help you understand the missingness structure of your data. This is my recommendation:
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
+
+#Remember, if you do not have these packages installed, install them first with (install.packages())
+
 library(naniar)
 library(finalfit)
 library(ggplot2)
@@ -15,7 +18,7 @@ Here I will be using the `airquality` dataset (available as default in all R) bu
 summary(airquality)
 ```
 
-We can already see with a simple summary, the ammount of missings we have per column. But what is their underlyng structure?
+We can already see with a simple summary, the ammount of missings we have per column. But what is their underlying structure?
 
 ```{r}
 YourDataset <- airquality
@@ -33,7 +36,7 @@ Open up this ll object. What are you seeing here? `is.na()` detects all values c
 View(ll)
 ```
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 cols <- sapply(ll, is.logical)
 ll[, cols] <- lapply(ll[, cols], as.numeric)
 
@@ -62,7 +65,7 @@ print(vis_miss(YourDataset, warn_large_data = FALSE) +
         theme(axis.text.x =  element_text(angle = 90)))
 
 
-
+# uncomment to have your pdf created
 #pdf("Missing2.pdf", 20, 10)
 #print(vis_miss(YourDataset, warn_large_data = FALSE) + 
 #        theme(axis.text.x =  element_text(angle = 90)))
@@ -76,13 +79,8 @@ Very clear outline of missingness in the whole dataset. But be careful in big da
 ```{r}
 
 missing_pattern(YourDataset)
- #missing_pattern(dependent, explanatory)
-```
 
-Final, very clear overview of patterns per variable. Spend a moment trying to understand these values. This function works great with big datasets too, although sometimes it gets a bit busy with lots of numbers.
-
-```{r}
-
+# uncomment to have your pdf created
 
 #pdf("PlotMissing3.pdf", 4,11)
 #
@@ -93,5 +91,8 @@ Final, very clear overview of patterns per variable. Spend a moment trying to un
 
 
 ```
+
+Final, very clear overview of patterns per variable. Spend a moment trying to understand these values. This function works great with big datasets too, although sometimes it gets a bit busy with lots of numbers.
+
 
 Open up your three newly created pdfs!

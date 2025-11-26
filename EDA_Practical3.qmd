@@ -5,13 +5,7 @@ execute:
   engine: knitr
 ---
 
-### Welcome to the "Data Transformation" practical session.
-
-We are using both **Pandas** (data loading, processing, transformation and manipulation) and **Scikit-learn** (example data source, ML and statistical analysis)
-
-## Data Scaling and Normalization
-
--   Different Types of Normalization.
+We are now continuing with Python and pre-processing functions. In this case, we will be exploring feature scaling and transformation.
 
 ### Data Set Used :
 
@@ -19,7 +13,7 @@ Breast Cancer Wisconsin (Diagnostic) Data Set
 
 Features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image. n the 3-dimensional space is that described in: \[K. P. Bennett and O. L. Mangasarian: "Robust Linear Programming Discrimination of Two Linearly Inseparable Sets", Optimization Methods and Software 1, 1992, 23-34\].
 
-```{r}
+```{r, include=FALSE}
 
 library(reticulate)
 
@@ -51,8 +45,9 @@ import matplotlib.pyplot as plt
 
 ```{python}
 # Load the dataset
-data = datasets.load_breast_cancer()
-df = pd.DataFrame(data.data, columns=data.feature_names)
+data = datasets.load_breast_cancer() #already included in libraries downloaded
+df = pd.DataFrame(data.data, columns=data.feature_names) #pick just 5/30 features
+
 ```
 
 ```{python}
@@ -60,13 +55,17 @@ df = pd.DataFrame(data.data, columns=data.feature_names)
 print(df.head())
 ```
 
+Let's plot the data before transformation
+
 ```{python}
-# Let's plot the data before transformation
+
 plt.figure(figsize=(10, 6))
 sns.kdeplot(data=df)
 plt.title("Non-normalised data")
 plt.show()
 ```
+
+It is very difficult to see anything right? This is because we have most data around 0 but then a very long tail to the right!
 
 #### Strategy 1 : Min-Max scaling
 
@@ -74,7 +73,7 @@ Min-Max scaling: This transformation scales and translates each feature individu
 
 ```{python}
 #### Strategy 1 : Min-Max scaling
-scaler = preprocessing.MinMaxScaler(feature_range=(0,100))
+scaler = preprocessing.MinMaxScaler(feature_range=(0,100)) #what happens if you change the 100? 
 df_minmax = pd.DataFrame(scaler.fit_transform(df), columns=data.feature_names)
 #print("\nAfter Min-Max Scaling:\n", df_minmax.head())
 
@@ -101,7 +100,6 @@ print("\nAfter Log Transformation:\n", df_log.head())
 
 
 
-# Let's plot the data after min-max scaling
 plt.figure(figsize=(10, 6))
 sns.kdeplot(data=df_log)
 plt.title("After Log Transformation")
@@ -140,61 +138,15 @@ plt.show()
 
 ```
 
-### Power transformation (Cube):
-
-This transformation raises each value in the DataFrame to the power of 3. It can be used to increase the skewness in the data.
-
-```{python}
-
-# Power transformation (cube)
-df_power = df.apply(lambda x: x**3)
-print("\nAfter Power Transformation:\n", df_power.head())
-
-# Let's plot the data after power transformation
-plt.figure(figsize=(10, 6))
-sns.kdeplot(data=df_power)
-plt.title("After Power Transformation")
-plt.show()
-```
-
-### Quantile transformation:
-
-Quantile transformation, also known as quantile normalization, is a technique for making two distributions identical in statistical properties. To achieve this, it maps the values from the input distribution to a desired output distribution, such as a uniform or a normal distribution.
-
-The process can be summarized as follows:
-
-For each feature, sort the values in ascending order.
-
-The smallest value is replaced with the smallest value from the desired distribution, the second smallest with the second smallest, and so on.
-
-This way, the transformed data will have the same distribution as the desired output distribution, while preserving the rank of the original data.
-
-One of the main uses of quantile transformation is to reduce the impact of outliers. Because it's based on the rank of the data, not the actual values, extreme values will be closer to the rest of the data after transformation.
-
-Another use is to make non-linear data more suitable for linear models. If a feature has a distribution that's skewed or has a heavy tail, quantile transformation can help make it more "normal", so that linear models can make better predictions.
-
-```{python}
-
-# Quantile transformation
-scaler = preprocessing.QuantileTransformer(output_distribution='normal')
-df_quantile = pd.DataFrame(scaler.fit_transform(df), columns=data.feature_names)
-print("\nAfter Quantile Transformation:\n", df_quantile.head())
-
-# Let's plot the data after quantile transformation
-plt.figure(figsize=(10, 6))
-sns.kdeplot(data=df_quantile)
-plt.title("After Quantile Transformation")
-plt.show()
-```
 
 #### Your Task
 
 ## Question 1:
 
 ```         
-1.1 Load the Bupa Data set and apply Quantile Normalization on each feature.
+1.1 Load the Bupa Data set and apply a new transformations from <https://scikit-learn.org/stable/modules/preprocessing.html> to a feature of your choice
 1.2 Remove the Label column ("selector") from the data set.
-1.3 Visualize the data before and after normalization using boxplot. 
+1.3 Visualize the data before and after the feature transformation using boxplots. 
 ```
 
 You can download the dataset through the link:
@@ -208,22 +160,6 @@ You can download the dataset through the link:
 
 #print(df_bupa)
 
-#print("\Before Quantile Transformation:\n")
-# Let's plot the data after quantile transformation
-#plt.figure(figsize=(10, 6))
-#sns.boxplot(data=df_bupa)
-#plt.title("After Quantile Transformation")
-#plt.show()
-
-## ------------------- Complete This ------------------------- ##
-## scaler = preprocessing. ... 
-## df_bupa_quantile = pd.DataFrame(scaler.fit_transform( ... ), columns =  ... )
-
-#print("\nAfter Quantile Transformation:\n")
-## Let's plot the data after quantile transformation
-#plt.figure(figsize=(10, 6))
-#sns.boxplot(data=df_bupa_quantile)
-#plt.title("After Quantile Transformation")
-#plt.show()
 
 ```
+

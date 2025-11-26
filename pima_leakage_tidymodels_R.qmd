@@ -1,0 +1,110 @@
+
+---
+title: "Pima – Leakage, Imputation & Scaling with tidymodels (R)"
+format:
+  html:
+    toc: true
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(tidymodels)
+
+theme_set(theme_minimal())
+set.seed(123)
+```
+
+## 1. Data and goal
+
+We will use the `PimaIndiansDiabetes2` dataset and focus on simple regression problems where:
+
+- **Outcome**: `pedigree` (diabetes pedigree function)  
+- **Predictors**: combinations of `age`, `glucose`, `insulin`  
+
+We will:
+
+1. Show **leakage with scaling** (standardisation).
+2. Show **leakage with mean imputation** of `insulin`.
+3. Show the **correct, leak-free approach** using **recipes + workflows** in tidymodels.
+
+```{r}
+data("PimaIndiansDiabetes2", package = "mlbench")
+
+pima_base <- PimaIndiansDiabetes2 %>%
+  clean_names() %>%
+  select(age, glucose, insulin, pedigree) %>%
+  filter(!is.na(pedigree))  # outcome must be present
+
+head(pima_base)
+summary(pima_base)
+```
+
+
+## 4. Doing it properly with tidymodels recipes (impute + scale)
+
+Finally, we let **recipes** handle both:
+
+- `step_impute_mean()` → mean imputation  
+- `step_normalize()` → standardisation  
+
+The recipe is **fitted on the training data only** and then applied to the test data via `last_fit()`.
+
+```{r}
+pima_rec <- pima_base %>%
+  select(age, glucose, insulin, pedigree)
+
+set.seed(123)
+rec_split <- initial_split(pima_rec, prop = 0.7)
+
+pima_train <- training(rec_split)
+pima_test  <- testing(rec_split)
+
+pima_train %>% head()
+```
+
+```{r}
+# Recipe: impute + scale all predictors
+ped_recipe <- recipe(pedigree ~ age + glucose + insulin, data = pima_train) %>%
+  step_impute_mean(all_predictors()) %>%
+  step_normalize(all_predictors())
+
+ped_recipe
+```
+
+```{r}
+ped_model_rec <- linear_reg() %>%
+  set_engine("lm")
+
+ped_wf <- workflow() %>%
+  add_model(ped_model_rec) %>%
+  add_recipe(ped_recipe)
+
+ped_wf
+```
+
+```{r}
+# Fit on TRAIN, evaluate on TEST
+final_fit <- last_fit(
+  ped_wf,
+  split   = rec_split,
+  metrics = metric_set(mae)
+)
+
+collect_metrics(final_fit)
+```
+
+```{r}
+# Optional: inspect the baked design matrix
+prepped_recipe <- prep(ped_recipe)
+
+baked_train <- bake(prepped_recipe, new_data = pima_train)
+baked_test  <- bake(prepped_recipe, new_data = pima_test)
+
+head(baked_train)
+```
