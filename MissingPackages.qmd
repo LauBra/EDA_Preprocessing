@@ -1,0 +1,97 @@
+## Missing Pipelines in R
+
+As with the correlation matrices before, there are really good packages to help you understand the missingness structure of your data. This is my recommendation:
+
+```{r}
+library(naniar)
+library(finalfit)
+library(ggplot2)
+library(mice)
+```
+
+Here I will be using the `airquality` dataset (available as default in all R) but everything would be ready for you to introduce your own dataset in a future.
+
+```{r}
+summary(airquality)
+```
+
+We can already see with a simple summary, the ammount of missings we have per column. But what is their underlyng structure?
+
+```{r}
+YourDataset <- airquality
+```
+
+### Plot 1
+
+```{r}
+ll <- data.frame(is.na(YourDataset))
+```
+
+Open up this ll object. What are you seeing here? `is.na()` detects all values coded as `NA` and gives a logical output, `TRUE` if truly a missing value and `FALSE` if not
+
+```{r}
+View(ll)
+```
+
+```{r}
+cols <- sapply(ll, is.logical)
+ll[, cols] <- lapply(ll[, cols], as.numeric)
+
+Miss1 <- UpSetR::upset(ll,
+                       nsets = 20, number.angles = 10, point.size = 3.5, line.size = 2,
+                       mainbar.y.label = "Missing Values", sets.x.label = "Total Number Missing Values",
+                       text.scale = c(2.3, 2.3, 2, 2, 2, 1.75), order.by = "freq", sets.bar.color = "red3"
+)
+
+
+Miss1
+```
+
+Here we can see common patterns! If missing values were to happen at the same time in different variables, we would see it clearly. Lets store this figure into our own directories so we can then use it for our final research output!
+
+```{r}
+pdf("MissingVal1.pdf", 10, 20)
+print(Miss1)
+dev.off()
+```
+
+# Plot 2
+
+```{r}
+print(vis_miss(YourDataset, warn_large_data = FALSE) + 
+        theme(axis.text.x =  element_text(angle = 90)))
+
+
+
+#pdf("Missing2.pdf", 20, 10)
+#print(vis_miss(YourDataset, warn_large_data = FALSE) + 
+#        theme(axis.text.x =  element_text(angle = 90)))
+#dev.off()
+```
+
+Very clear outline of missingness in the whole dataset. But be careful in big datasets!
+
+# Plot 3
+
+```{r}
+
+missing_pattern(YourDataset)
+ #missing_pattern(dependent, explanatory)
+```
+
+Final, very clear overview of patterns per variable. Spend a moment trying to understand these values. This function works great with big datasets too, although sometimes it gets a bit busy with lots of numbers.
+
+```{r}
+
+
+#pdf("PlotMissing3.pdf", 4,11)
+#
+#print(missing_pattern(YourDataset))
+#
+#dev.off()
+#
+
+
+```
+
+Open up your three newly created pdfs!

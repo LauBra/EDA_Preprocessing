@@ -1,0 +1,180 @@
+
+---
+title: "Pima Imputation → Leak vs Leak-free (R)"
+format:
+  html:
+    toc: true
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(tidymodels)
+
+theme_set(theme_minimal())
+set.seed(123)
+```
+
+## Imputation leakage with insulin (no scaling)
+
+We now look at **mean imputation of `insulin`**:
+
+- **Outcome**: `pedigree`
+- **Predictors**: `age`, `insulin_imp`
+- We compare:
+  - ❌ **WRONG**: mean for imputation computed using **all data** (leakage)
+  - ✅ **RIGHT**: mean for imputation computed using **training data only**
+
+```{r}
+data("PimaIndiansDiabetes2", package = "mlbench")
+
+pima_imp <- PimaIndiansDiabetes2 %>%
+  clean_names() %>%
+  select(age, insulin, pedigree) %>%
+  filter(!is.na(pedigree))  # outcome must be present
+
+summary(pima_imp)
+```
+
+### 1. WRONG pipeline: impute using global mean (leakage)
+
+Here we:
+
+1. Compute the **global mean insulin** using all rows.
+2. Impute missing insulin values with this global mean.
+3. Then split into train/test.
+4. Fit `pedigree ~ age + insulin_imp` and evaluate MAE.
+
+```{r}
+# 1. Global mean (leaky: uses all data)
+mean_all_insulin <- mean(pima_imp$insulin, na.rm = TRUE)
+mean_all_insulin
+```
+
+```{r}
+# 2. Impute WHOLE dataset with global mean (before splitting)
+pima_imp_wrong <- pima_imp %>%
+  mutate(
+    insulin_imp = ifelse(is.na(insulin), mean_all_insulin, insulin)
+  )
+
+summary(pima_imp_wrong$insulin_imp)
+```
+
+```{r}
+# 3. Train–test split AFTER imputation (still leaky)
+set.seed(123)
+split_wrong <- initial_split(pima_imp_wrong, prop = 0.7)
+
+train_wrong <- training(split_wrong)
+test_wrong  <- testing(split_wrong)
+
+nrow(train_wrong); nrow(test_wrong)
+```
+
+```{r}
+# 4. Fit linear regression and compute MAE (WRONG)
+ped_model <- linear_reg() %>%
+  set_engine("lm")
+
+fit_wrong_imp <- ped_model %>%
+  fit(pedigree ~ age + insulin_imp, data = train_wrong)
+
+tidy(fit_wrong_imp)
+```
+
+```{r}
+results_wrong_imp <- predict(fit_wrong_imp, new_data = test_wrong) %>%
+  bind_cols(test_wrong)
+
+mae_wrong_imp <- mae(
+  data     = results_wrong_imp,
+  truth    = pedigree,
+  estimate = .pred
+)
+
+mae_wrong_imp
+```
+
+---
+
+### 2. RIGHT pipeline: impute using training mean only (no leakage)
+
+Now we:
+
+1. Split the **original (unimputed)** data into train/test.
+2. Compute mean insulin **using training data only**.
+3. Impute train and test using this **training mean**.
+4. Fit the same model and compute MAE.
+
+```{r}
+# 1. Train–test split on RAW data
+set.seed(123)
+split_right <- initial_split(pima_imp, prop = 0.7)
+
+train_right <- training(split_right)
+test_right  <- testing(split_right)
+
+nrow(train_right); nrow(test_right)
+```
+
+```{r}
+# 2. Training-only mean for insulin (correct)
+mean_tr_insulin <- mean(train_right$insulin, na.rm = TRUE)
+mean_tr_insulin
+```
+
+```{r}
+# 3. Impute train and test using TRAIN mean
+train_right_imp <- train_right %>%
+  mutate(
+    insulin_imp = ifelse(is.na(insulin), mean_tr_insulin, insulin)
+  )
+
+test_right_imp <- test_right %>%
+  mutate(
+    insulin_imp = ifelse(is.na(insulin), mean_tr_insulin, insulin)
+  )
+
+summary(train_right_imp$insulin_imp)
+summary(test_right_imp$insulin_imp)
+```
+
+```{r}
+# 4. Fit linear regression and compute MAE (RIGHT)
+fit_right_imp <- ped_model %>%
+  fit(pedigree ~ age + insulin_imp, data = train_right_imp)
+
+tidy(fit_right_imp)
+```
+
+```{r}
+results_right_imp <- predict(fit_right_imp, new_data = test_right_imp) %>%
+  bind_cols(test_right_imp)
+
+mae_right_imp <- mae(
+  data     = results_right_imp,
+  truth    = pedigree,
+  estimate = .pred
+)
+
+mae_right_imp
+```
+
+---
+
+### 3. Compare MAE: imputation with vs without leakage
+
+```{r}
+tibble(
+  pipeline = c("WRONG: impute with global mean (leakage)",
+               "RIGHT: impute with training mean only"),
+  MAE = c(mae_wrong_imp$.estimate,
+          mae_right_imp$.estimate)
+)
+```

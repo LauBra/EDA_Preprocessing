@@ -1,0 +1,141 @@
+
+---
+title: "Pima Preprocessing → Leak-free ML Pipeline (R)"
+format:
+  html:
+    toc: true
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(tidymodels)
+theme_set(theme_minimal())
+set.seed(123)
+```
+
+
+```{r}
+
+
+data("PimaIndiansDiabetes2", package = "mlbench")
+
+pima_small <- PimaIndiansDiabetes2 %>%
+  clean_names() %>%
+  select(age, glucose, pedigree) %>%
+  filter(!is.na(pedigree))  # outcome must be present
+
+head(pima_small)
+```
+
+We need to scale (we are doing it by simple standarization (substract by mean and divide by standard deviation)). 
+
+What happens if we do this for the whole dataset, before train and test split?
+
+```{r}
+
+mean_all_glucose <- mean(pima_small$glucose, na.rm = TRUE)
+sd_all_glucose <- sd(  pima_small$glucose, na.rm = TRUE)
+
+mean_all_age <- mean(pima_small$age, na.rm = TRUE)
+sd_all_age <- sd(  pima_small$age, na.rm = TRUE)
+
+
+
+```
+
+```{r}
+
+pima_small_scaled <- pima_small %>%
+  mutate(glucose_scaled = (glucose - mean_all_glucose) / sd_all_glucose,
+         age_scaled = (age - mean_all_age) / sd_all_age
+  ) 
+
+```
+
+
+
+```{r}
+set.seed(123)
+data_split <- initial_split(pima_small_scaled, prop = 0.7)
+
+train <- training(data_split)
+test  <- testing(data_split)
+```
+
+```{r}
+ped_model <- linear_reg() %>%
+  set_engine("lm")
+
+fit_wrong <- ped_model %>%
+  fit(pedigree ~ age_scaled + glucose_scaled, data = train)
+
+results_wrong <- predict(fit_wrong, new_data = test) %>%
+  bind_cols(test)  # adds .pred alongside pedigree
+
+mae_wrong <- mae(results_wrong,
+                 truth = pedigree,
+                 estimate = .pred)
+
+mae_wrong
+```
+###############
+
+
+
+```{r}
+set.seed(123)
+data_split_right <- initial_split(pima_small, prop = 0.7)
+
+train <- training(data_split_right)
+test  <- testing(data_split_right)
+```
+
+
+```{r}
+
+mu_tr_glucose  <- mean(train$glucose, na.rm = TRUE)
+sd_tr_glucose  <- sd(train$glucose, na.rm = TRUE)
+
+
+mu_tr_age  <- mean(train$age, na.rm = TRUE)
+sd_tr_age <- sd(train$age, na.rm = TRUE)
+
+
+train_scaled <- train %>%
+  mutate(glucose_scaled = (glucose - mu_tr_glucose) / sd_tr_glucose,
+         age_scaled = (age - mu_tr_age) / sd_tr_age
+  ) 
+
+
+test_scaled <- test %>%
+  mutate(glucose_scaled = (glucose - mu_tr_glucose) / sd_tr_glucose,
+         age_scaled = (age - mu_tr_age) / sd_tr_age
+  ) 
+```
+
+```{r}
+
+
+ped_model <- linear_reg() %>%
+  set_engine("lm")
+
+fit_right <- ped_model %>%
+  fit(pedigree ~ age_scaled + glucose_scaled, data = train)
+
+results_right <- predict(fit_right, new_data = test) %>%
+  bind_cols(test)  # adds .pred alongside pedigree
+
+mae_right <- mae(results_right,
+                 truth = pedigree,
+                 estimate = .pred)
+
+mae_right
+
+```
+

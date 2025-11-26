@@ -1,0 +1,185 @@
+
+---
+title: "Pima Preprocessing → Leak-free ML Pipeline (R)"
+format:
+  html:
+    toc: true
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(tidymodels)
+
+theme_set(theme_minimal())
+set.seed(123)
+```
+
+## 1. Data and goal
+
+We will use the `PimaIndiansDiabetes2` dataset and focus on a **simple regression problem**:
+
+- **Outcome**: `pedigree` (diabetes pedigree function)  
+- **Predictors**: `age`, `glucose`  
+
+Our goal is to **compare two pipelines**:
+
+1. A **wrong** one, where we scale *before* splitting (data leakage).
+2. A **correct** one, where we scale using **training data only**.
+
+We’ll use **MAE (Mean Absolute Error)** to compare test performance.
+
+```{r}
+data("PimaIndiansDiabetes2", package = "mlbench")
+
+pima_small <- PimaIndiansDiabetes2 %>%
+  clean_names() %>%
+  select(age, glucose, pedigree) %>%
+  filter(!is.na(pedigree))  # outcome must be present
+
+head(pima_small)
+summary(pima_small)
+```
+
+## 2. WRONG pipeline: scaling before train–test split (leakage)
+
+### 2.1. Compute global mean and sd (leaky)
+
+```{r}
+mean_all_glucose <- mean(pima_small$glucose, na.rm = TRUE)
+sd_all_glucose   <- sd(pima_small$glucose, na.rm = TRUE)
+
+mean_all_age <- mean(pima_small$age, na.rm = TRUE)
+sd_all_age   <- sd(pima_small$age, na.rm = TRUE)
+
+mean_all_glucose; sd_all_glucose
+mean_all_age; sd_all_age
+```
+
+### 2.2. Scale the full dataset using global statistics
+
+```{r}
+pima_small_scaled <- pima_small %>%
+  mutate(
+    glucose_scaled = (glucose - mean_all_glucose) / sd_all_glucose,
+    age_scaled     = (age - mean_all_age) / sd_all_age
+  )
+
+head(pima_small_scaled)
+```
+
+### 2.3. Train–test split on already scaled data
+
+```{r}
+set.seed(123)
+data_split <- initial_split(pima_small_scaled, prop = 0.7)
+
+train <- training(data_split)
+test  <- testing(data_split)
+
+nrow(train); nrow(test)
+```
+
+### 2.4. Fit linear regression model and compute MAE (WRONG)
+
+```{r}
+ped_model <- linear_reg() %>%
+  set_engine("lm")
+
+fit_wrong <- ped_model %>%
+  fit(pedigree ~ age_scaled + glucose_scaled, data = train)
+
+results_wrong <- predict(fit_wrong, new_data = test) %>%
+  bind_cols(test)
+
+mae_wrong <- mae(
+  data    = results_wrong,
+  truth   = pedigree,
+  estimate = .pred
+)
+
+mae_wrong
+```
+
+## 3. RIGHT pipeline: scaling using training data only (no leakage)
+
+### 3.1. Train–test split on the original data
+
+```{r}
+set.seed(123)
+data_split_right <- initial_split(pima_small, prop = 0.8)
+
+train <- training(data_split_right)
+test  <- testing(data_split_right)
+
+nrow(train); nrow(test)
+```
+
+### 3.2. Compute training-only mean and sd
+
+```{r}
+mu_tr_glucose <- mean(train$glucose, na.rm = TRUE)
+sd_tr_glucose <- sd(train$glucose, na.rm = TRUE)
+
+mu_tr_age <- mean(train$age, na.rm = TRUE)
+sd_tr_age <- sd(train$age, na.rm = TRUE)
+
+mu_tr_glucose; sd_tr_glucose
+mu_tr_age; sd_tr_age
+```
+
+### 3.3. Scale train and test using training statistics
+
+```{r}
+train_scaled <- train %>%
+  mutate(
+    glucose_scaled = (glucose - mu_tr_glucose) / sd_tr_glucose,
+    age_scaled     = (age - mu_tr_age)     / sd_tr_age
+  )
+
+test_scaled <- test %>%
+  mutate(
+    glucose_scaled = (glucose - mu_tr_glucose) / sd_tr_glucose,
+    age_scaled     = (age - mu_tr_age)     / sd_tr_age
+  )
+
+head(train_scaled)
+head(test_scaled)
+```
+
+### 3.4. Fit linear regression model and compute MAE (RIGHT)
+
+```{r}
+ped_model <- linear_reg() %>%
+  set_engine("lm")
+
+fit_right <- ped_model %>%
+  fit(pedigree ~ age_scaled + glucose_scaled, data = train_scaled)
+
+results_right <- predict(fit_right, new_data = test_scaled) %>%
+  bind_cols(test_scaled)
+
+mae_right <- mae(
+  data    = results_right,
+  truth   = pedigree,
+  estimate = .pred
+)
+
+mae_right
+```
+
+## 4. Comparing MAE: leaky vs leak-free
+
+```{r}
+tibble(
+  pipeline = c("WRONG: scaled before split (leakage)",
+               "RIGHT: scaled using training only"),
+  MAE = c(mae_wrong$.estimate,
+          mae_right$.estimate)
+)
+```

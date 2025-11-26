@@ -1,0 +1,63 @@
+project:
+  type: website
+  render: 
+  - HistogramBoxplot.qmd
+  - Correlation.qmd 
+  - MissingPackages.qmd
+  - EDA_Practical1_Final.qmd
+  - EDA_Practical3.qmd
+  - pima_leakage_pipeline.qmd
+  - pima_imputation_leakage.qmd
+  - pima_preprocessing_sklearn_python.qmd
+  - Pima_Challenge_Explore.qmd
+
+execute:
+  echo: true
+  python:
+    version: "r-reticulate"
+    
+website:
+  back-to-top-navigation: true
+  page-navigation: true
+  title: "HDS MSc - Module 3 - PreProcessing/EDA"
+  navbar:
+    background: primary
+    search: true
+    left:
+      - text: "EDA and Pre-Processing"
+        file: HistogramBoxplot.qmd
+ 
+  sidebar:
+    - title: "EDA and Pre-Processing"
+      contents:
+        - HistogramBoxplot.qmd
+        - Correlation.qmd 
+        - divider: true  # Adds a divider
+        - MissingPackages.qmd
+        - EDA_Practical1_Final.qmd
+        - EDA_Practical3.qmd
+        - divider: true  # Adds a divider
+        - pima_leakage_pipeline.qmd
+        - pima_imputation_leakage.qmd
+        - pima_preprocessing_sklearn_python.qmd
+        - Pima_Challenge_Explore.qmd
+        
+  page-footer: 
+    left: "Copyright 2025, Laura Bravo" 
+    background: light
+    right: 
+      - icon: twitter 
+        href: https://twitter.com/laura_bravo94
+
+    
+format:
+  html:
+    theme: cosmo
+    #css: styles.css
+    toc: true
+   # code-fold: true
+    code-tools: true
+    code-link: true
+
+editor: visual
+

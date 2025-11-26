@@ -1,0 +1,189 @@
+---
+title: 'Missing Data Imputation - Python'
+format: html
+execute:
+  engine: knitr
+---
+
+```{r}
+library(reticulate)
+
+# one-off setup (if you haven't done it yet)
+# install_miniconda()
+
+##conda_create(
+##  envname = "hds-python",
+##  python_version = "3.11",
+##  packages = c("numpy", "pandas", "matplotlib", "seaborn", "scikit-learn")
+##)
+
+use_condaenv("hds-python", required = TRUE)
+#py_config()
+
+#conda_install("hds-python", c("jupyter", "plotly"))
+```
+
+### Missing Data Imputation
+
+We are using both **Pandas** (data loading, processing, transformation and manipulation) and **Scikit-learn** (example data source, ML and statistical analysis)
+
+This example illustrates how to apply different preprocessing and feature imputation pipelines to different subsets of features, using `SimpleImputer` and `KNNImputer`. This is particularly handy for the case of datasets that contain heterogeneous data types, since we may want to impute the numeric as well as categorical features.
+
+```{python}
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.impute import SimpleImputer, KNNImputer
+from sklearn.datasets import fetch_openml
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
+from sklearn import set_config
+set_config(display='diagram')
+```
+
+You can download the dataset we will be using through the link:
+
+-   [LongIsland_Heart_Data.csv](/Users/bravol/Desktop/ML%20Class/Practical/EDA/LongIsland_Heart_Data.csv)
+
+```{python}
+np.random.seed(0)
+
+## Load the LongIsland_Heart_Data Set
+heart_df = pd.read_csv('/Users/l.bravo@bham.ac.uk/Library/CloudStorage/OneDrive-UniversityofBirmingham/Desktop/Practical/EDA/LongIsland_Heart_Data.csv') #change to your own directory
+
+heart_df.describe() #similar to summary()
+print(heart_df)
+```
+
+Now let's make a smaller dataset with just 4 features:
+
+Numeric Features:
+
+-   `chol`: numeric; -- serum cholestoral in mg/dl
+-   `thalach`: numeric -- maximum heart rate achieved
+
+Categorical Features:
+
+-   `sex`: categories encoded as numeric `{'1 = male', '2=female'}`;
+-   `cp`: ordinal integers `{1, 2, 3, 4}`. -- Value 1: typical angina -- Value 2: atypical angina -- Value 3: non-anginal pain -- Value 4: asymptomatic
+
+```{python}
+X_reduced = heart_df.loc[:, ['chol', 'thalach','sex','cp']]
+print(X_reduced)
+```
+
+### Visualize Missingness
+
+```{python}
+sns.heatmap(X_reduced.isnull(), cbar=False, cmap="viridis")
+plt.title("Missing Values Heatmap")
+plt.show()
+```
+
+### Impute Missing Values with SimpleImputer
+
+For more information on imputation in python go to <https://scikit-learn.org/1.5/modules/generated/sklearn.impute.SimpleImputer.html>
+
+```{python}
+# Define numeric and categorical features
+numeric_features = ['chol', 'thalach']
+categorical_features = ['sex','cp']
+```
+
+Make sure categorical values are interpreted as categorical
+
+```{python}
+X_reduced.dtypes
+```
+
+```{python}
+X_reduced[categorical_features] = X_reduced[categorical_features].astype('category')
+```
+
+```{python}
+X_reduced.dtypes
+```
+
+```{python}
+# Impute numeric features with the mean
+numeric_imputer = SimpleImputer(strategy='median')
+X_reduced[numeric_features] = numeric_imputer.fit_transform(X_reduced[numeric_features])
+
+print(X_reduced)
+```
+
+```{python}
+# Impute categorical features with a constant value ('Unknown')
+categorical_imputer = SimpleImputer(strategy='constant', fill_value=-1)
+X_reduced[categorical_features] = categorical_imputer.fit_transform(X_reduced[categorical_features])
+
+print(X_reduced)
+```
+
+Visualize the imputation. Has it worked?
+
+```{python}
+sns.heatmap(X_reduced.isnull(), cbar=False, cmap="viridis")
+plt.title("Missing Values Heatmap")
+plt.show()
+```
+
+Now impute Missing Values with KNNImputer (for Numeric Data)
+
+```{python}
+X_reduced_KNN = heart_df.loc[:, ['chol', 'thalach','sex','cp']]
+
+knn_imputer = KNNImputer(n_neighbors=5)
+X_reduced_KNN[numeric_features] = knn_imputer.fit_transform(X_reduced_KNN[numeric_features])
+
+```
+
+What difference can we see in the datasets? Compare Summary Statistics Before and After Imputation
+
+```{python}
+X_reduced_KNN.describe()
+```
+
+```{python}
+X_reduced.describe()
+```
+
+## Dummy variables
+
+As well as imputation we are interested in other transformations. For example, hot encoding categorical data. For extra insight <https://www.kaggle.com/code/marcinrutecki/one-hot-encoding-everything-you-need-to-know>
+
+```{python}
+X_reduced_Encoder = heart_df.loc[:, ['chol', 'thalach','sex','cp']]
+X_reduced_Encoder[categorical_features] = X_reduced_Encoder[categorical_features].astype('category')
+
+# Apply OneHotEncoder
+encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
+encoded_categorical = encoder.fit_transform(X_reduced_Encoder[categorical_features])
+
+```
+
+```{python}
+encoded_df = pd.DataFrame(
+    encoded_categorical,
+    columns=encoder.get_feature_names_out(categorical_features)
+)
+```
+
+```{python}
+# Combine the encoded features with the original dataset (drop original categorical columns)
+visualised_df = pd.concat([X_reduced_Encoder.drop(columns=categorical_features), encoded_df], axis=1)
+print(visualised_df)
+```
+
+As you have seen we have gone back to original data so one of the new columns created is nan! To circumvent this apply this to a dataframe AFTER imputation!!!
+
+```{python}
+
+#Impute dataset and then do the hot encoding: 
+
+```
+
+Check out the concept of Pipeline <https://scikit-learn.org/1.5/modules/generated/sklearn.pipeline.Pipeline.html> when do you think it can come in handy?

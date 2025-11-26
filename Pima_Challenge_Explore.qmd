@@ -1,0 +1,205 @@
+
+---
+title: "Pima Machine Learning Challenge – Exploratory Preprocessing (R & Python)"
+format:
+  html:
+    toc: true
+    code-fold: false
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+# Pima ML Challenge  
+### *Explore preprocessing choices*
+
+---
+
+# 1. Load and inspect the data
+
+Use the Pima Indians Diabetes dataset and work with:
+
+- predictors: `age`, `glucose`, `insulin`
+- outcome: `pedigree`
+
+Create a **train/test split** and reuse it for all experiments.
+
+**Tools you will need:**
+
+- **R:** `initial_split()`, `training()`, `testing()`
+- **Python:** `train_test_split()` from scikit‑learn
+
+---
+
+# 2. Baseline model (no preprocessing)
+
+Fit a simple regression model:
+
+- Outcome: `pedigree`
+- Predictors: `age + glucose + insulin + diabetes`
+
+**Goal:**  
+Get a *baseline MAE* against which all your later models will be compared.
+
+**Tools:**
+
+- **R:**  
+  - model: `linear_reg(engine = "lm")`  
+  - evaluation: `mae()`  
+- **Python:**  
+  - model: `LinearRegression()`  
+  - evaluation: `mean_absolute_error()`
+
+**Resources:** tidymodels.org / scikit-learn.org  
+
+---
+
+# 3. Mean imputation (leak-free)
+
+Some insulin and glucose values are missing.  
+Try **mean imputation**, but **do it correctly**:
+
+- mean should be computed **from the training data only**
+- apply that mean to both training and test sets
+
+**Tools:**
+
+- **R (recipes):**  
+  - imputation step to explore: `step_impute_mean()`  
+- **Python:**  
+  - `SimpleImputer(strategy="mean")`
+
+**Task:**  
+Compute MAE and compare with the baseline.
+
+---
+
+# 4. Try alternative imputation methods
+
+Experiment with **different imputation choices**:
+
+- median  
+- constant value  
+- optional: bagged tree imputation (R)
+
+**Tools:**
+
+- **R:**  
+  - `step_impute_median()`  
+  - `step_impute_bagged()`  
+- **Python:**  
+  - `SimpleImputer(strategy="median")`  
+  - `SimpleImputer(strategy="constant")`
+
+**Task:**  
+Which imputer gives the best MAE?  
+Which one behaves unexpectedly?
+
+---
+
+# 5. Log-transform insulin (after imputation)
+
+Create a new variable:
+
+\[
+\text{insulin\_log} = \log(\text{insulin})
+\]
+
+Do this **after** imputation to avoid problems with missing values or zeros.
+
+**Tools:**
+
+- **R:** `step_log()`  
+- **Python:** `FunctionTransformer` or manual `np.log1p()`
+
+**Task:**  
+Compare MAE between using insulin vs. insulin_log.
+
+---
+
+# 6. Categorical age + one-hot encoding
+
+Turn **age** into three categories:
+
+- `< 30`
+- `30−60`
+- `> 60`
+
+Then convert that categorical variable into dummy variables.
+
+**Tools:**
+
+- **R:**  
+  - cut age into categories (`mutate()` or `step_cut()`)  
+  - `step_dummy()` for one-hot encoding  
+- **Python:**  
+  - `pd.cut()`  
+  - `OneHotEncoder()`
+
+**Task:**  
+Check out coefficients of the model created, how do they differ? Are you identifying any issues when splitting the data? 
+
+---
+
+# 7. Build your **own** full pipeline
+
+Combine any of the following:
+
+- your preferred imputation method  
+- log-transform  
+- scaling  
+- age category & one‑hot encoding  
+- additional engineered features if you want
+
+**Tools:**
+
+- **R:**  
+  - `recipe()` + steps of your choice  
+  - build model with a workflow  
+  - evaluate with `last_fit()` *if you want* — or evaluate manually  
+- **Python:**  
+  - `ColumnTransformer()`  
+  - `Pipeline()`  
+  - evaluate with MAE
+
+**Task:**  
+Create **your best-performing MAE model**.
+
+---
+
+# 8. Compare all your models
+
+Create a small results table summarising:
+
+- baseline MAE  
+- each imputation MAE  
+- log-transform MAE  
+- age category MAE  
+- your final best model MAE
+
+Add a short reflection:
+
+> Which transformation improved performance?  
+> Which added complexity for no benefit?  
+> What does this suggest about the dataset?
+
+---
+
+# Resources You May Want to Explore
+
+### R
+- https://www.tidymodels.org/start/recipes/
+
+### Python
+- https://scikit-learn.org/stable/modules/impute.html  
+- https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html  
+- https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html  
+- https://scikit-learn.org/stable/modules/compose.ColumnTransformer.html  
+- https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html  
+
+Extra: This dataset has been widely studied, check out this python pipeline (until Pipeline factory in chunk 60) for a good preprocessing and EDA example
+
+- https://github.com/tarekmasryo/pima-diabetes-pipeline/blob/main/diabetes-prediction-from-eda-to-production.ipynb
+
+

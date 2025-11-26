@@ -1,0 +1,148 @@
+---
+title: "Untitled"
+---
+
+
+
+```{r}
+library(tidymodels)
+library(readr)
+library(janitor)
+
+set.seed(123)
+
+# 0. Load & clean -----------------------------------------------
+pima <- read_csv("pima_diabetes.csv") |>
+  clean_names() |>
+  mutate(
+    outcome = factor(outcome, levels = c(0, 1), labels = c("No", "Yes")),
+    insulin = na_if(insulin, 0),
+    bmi     = na_if(bmi, 0),
+    glucose = na_if(glucose, 0)
+  )
+
+# Use only complete rows for these 3 predictors (for a simple exercise)
+pima <- pima |>
+  select(outcome, insulin, age, bmi) 
+
+# Split
+pima_split <- initial_split(pima, strata = outcome)
+pima_train <- training(pima_split)
+pima_test  <- testing(pima_split)
+
+# 1. Model spec -------------------------------------------------
+log_spec <- logistic_reg() |>
+  set_engine("glm")
+
+# 2. Recipe A: raw insulin (impute + scale) ----------------------
+rec_raw <- recipe(outcome ~ insulin + age + bmi, data = pima_train) |>
+  step_impute_median(all_predictors()) |>
+  step_normalize(all_predictors())
+
+# 3. Recipe B: log(insulin) (impute → log → scale) ---------------
+rec_log <- recipe(outcome ~ insulin + age + bmi, data = pima_train) |>
+  step_impute_median(all_predictors()) |>
+  step_log(insulin, offset = 1) |>          # log(insulin + 1) to be safe
+  step_normalize(all_predictors())
+
+wf_raw <- workflow() |> add_model(log_spec) |> add_recipe(rec_raw)
+wf_log <- workflow() |> add_model(log_spec) |> add_recipe(rec_log)
+
+fit_raw <- fit(wf_raw, data = pima_train)
+fit_log <- fit(wf_log, data = pima_train)
+
+# 4. Evaluate on test set ---------------------------------------
+pred_raw <- predict(fit_raw, pima_test, type = "prob") |>
+  bind_cols(pima_test |> select(outcome))
+
+pred_log <- predict(fit_log, pima_test, type = "prob") |>
+  bind_cols(pima_test |> select(outcome))
+
+metric_set(roc_auc, accuracy)(pred_raw, truth = outcome, .pred_Yes)
+metric_set(roc_auc, accuracy)(pred_log, truth = outcome, .pred_Yes)
+
+```
+
+
+```{python}
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, FunctionTransformer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score, accuracy_score
+
+# 0. Load & basic cleaning -------------------------------------
+df = pd.read_csv("pima_diabetes.csv")
+df.columns = df.columns.str.lower()
+
+df.loc[df["insulin"] == 0, "insulin"] = np.nan
+df.loc[df["bmi"] == 0, "bmi"] = np.nan
+df.loc[df["glucose"] == 0, "glucose"] = np.nan
+
+X = df[["insulin", "age", "bmi"]]
+y = df["outcome"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=123
+)
+
+# 1. Base numeric transformer (impute + scale) -----------------
+base_num = Pipeline(steps=[
+    ("imputer", SimpleImputer(strategy="median")),
+    ("scaler", StandardScaler())
+])
+
+# Pipeline A: raw insulin
+preprocess_raw = ColumnTransformer(
+    transformers=[
+        ("num", base_num, ["insulin", "age", "bmi"])
+    ]
+)
+
+pipe_raw = Pipeline(steps=[
+    ("preprocess", preprocess_raw),
+    ("model", LogisticRegression(max_iter=1000))
+])
+
+# 2. Pipeline B: log(insulin) + scale --------------------------
+log_only_insulin = Pipeline(steps=[
+    ("imputer", SimpleImputer(strategy="median")),
+    ("log", FunctionTransformer(np.log1p, feature_names_out="one-to-one")),
+    ("scaler", StandardScaler())
+])
+
+others = Pipeline(steps=[
+    ("imputer", SimpleImputer(strategy="median")),
+    ("scaler", StandardScaler())
+])
+
+preprocess_log = ColumnTransformer(
+    transformers=[
+        ("insulin_log", log_only_insulin, ["insulin"]),
+        ("other_num", others, ["age", "bmi"])
+    ]
+)
+
+pipe_log = Pipeline(steps=[
+    ("preprocess", preprocess_log),
+    ("model", LogisticRegression(max_iter=1000))
+])
+
+# 3. Fit & evaluate --------------------------------------------
+pipe_raw.fit(X_train, y_train)
+pipe_log.fit(X_train, y_train)
+
+pred_raw = pipe_raw.predict_proba(X_test)[:, 1]
+pred_log = pipe_log.predict_proba(X_test)[:, 1]
+
+print("AUC raw insulin:", roc_auc_score(y_test, pred_raw))
+print("AUC log insulin:", roc_auc_score(y_test, pred_log))
+print("Accuracy raw:", accuracy_score(y_test, (pred_raw > 0.5).astype(int)))
+print("Accuracy log:", accuracy_score(y_test, (pred_log > 0.5).astype(int)))
+
+```
+
