@@ -1,4 +1,4 @@
-## (1) Histograms and Boxplots
+## (1) Histograms and Boxplots - R
 
 In this first practical, we will be using R. This is just a training to improve our plotting skills and basic understanding on data distribution. 
 
@@ -8,7 +8,7 @@ Histograms show the overall shape and spread of the data distribution and box pl
 
 ### Summary Statistics
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 
 #Remember, if you do not have these packages installed, install them first with (install.packages())
 

@@ -1,10 +1,9 @@
 
 ---
-title: "Pima – Imputation & Scaling with scikit-learn (Python)"
+title: "(8) Complete pipeline leakage - Python"
 format:
   html:
     toc: true
-    code-fold: true
 execute:
   echo: true
   warning: false

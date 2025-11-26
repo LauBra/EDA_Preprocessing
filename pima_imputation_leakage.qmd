@@ -1,10 +1,9 @@
 
 ---
-title: "Pima Imputation → Leak vs Leak-free (R)"
+title: "(7) Simple pipeline leakage (imputation) -R"
 format:
   html:
     toc: true
-    code-fold: true
 execute:
   echo: true
   warning: false

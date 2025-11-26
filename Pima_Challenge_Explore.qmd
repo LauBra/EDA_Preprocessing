@@ -1,6 +1,6 @@
 
 ---
-title: "Pima Machine Learning Challenge – Exploratory Preprocessing (R & Python)"
+title: "Extra challenge"
 format:
   html:
     toc: true
@@ -186,7 +186,7 @@ Add a short reflection:
 
 ---
 
-# Resources You May Want to Explore
+# Resources to Explore
 
 ### R
 - https://www.tidymodels.org/start/recipes/

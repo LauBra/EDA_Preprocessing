@@ -1,10 +1,9 @@
 
 ---
-title: "Pima – Leakage, Imputation & Scaling with tidymodels (R)"
+title: "(9) Complete pipeline leakage - R"
 format:
   html:
     toc: true
-    code-fold: true
 execute:
   echo: true
   warning: false

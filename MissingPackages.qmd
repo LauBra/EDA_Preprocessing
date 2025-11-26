@@ -1,4 +1,4 @@
-## (3) Missing Pipelines in R
+## (3) Missing Pipelines - R
 
 As with the correlation matrices before, there are really good packages to help you understand the missingness structure of your data. This is my recommendation:
 

@@ -1,10 +1,9 @@
 
 ---
-title: "Pima Preprocessing → Leak-free ML Pipeline (R)"
+title: "(6) Simple pipeline leakage (scaling) -R"
 format:
   html:
     toc: true
-    code-fold: true
 execute:
   echo: true
   warning: false
